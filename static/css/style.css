@@ -33,3 +33,30 @@ a {
     border-radius: 5px;
     margin-bottom: 5px;
 }
+
+.pic-box {
+    position: relative; /* Position the "Hot" tag relative to the image container */
+    display: inline-block; /* Ensure the image and the tag are aligned together */
+}
+
+.pic-box img {
+    display: block; /* Prevent spacing issues around the image */
+    width: 100%; /* Make sure the image fits its container */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.hot {
+    background-color: orangered;
+    color: white;
+    width: 75px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    top: 10px;  /* Adjust space from the top edge of the image */
+    left: 15px;  /* Align the tag to the left of the image */
+    z-index: 10;  /* Ensure it appears above the image */
+}
+
+
