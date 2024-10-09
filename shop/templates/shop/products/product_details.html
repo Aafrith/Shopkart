@@ -19,7 +19,9 @@
                       </nav>
                 </div>
                 <div class="col-4 my-3 pic-box">
+                    {% if products.trending %}
                     <div class="hot">Hot</div>
+                    {% endif %}
                     <!-- Use img-fluid and custom CSS for width and height -->
                     <img src="{{products.product_image.url}}" class="img-fluid" alt="{{products}}" style="max-width: 300px; height: 220px;">
                 </div>
