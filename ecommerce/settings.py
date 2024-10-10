@@ -50,6 +50,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CSRF_COOKIE_SECURE = False  # Set to True in production if using HTTPS
+CSRF_USE_SESSIONS = True  # Use session-based CSRF tokens (optional)
+CSRF_COOKIE_SAMESITE = 'Lax'  # Adjust based on your requirements
+
+
 ROOT_URLCONF = 'ecommerce.urls'
 
 TEMPLATES = [
