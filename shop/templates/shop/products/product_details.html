@@ -35,7 +35,7 @@
                     <div class="my-3">
                         {% if products.quantity > 0 %}
                         <input type="hidden"  value="{{products.id}}" id="pid">
-                        
+                        {% csrf_token %}
                         <p>
                             <div class="input-group" style="width:150px">
                                 <button class="input-group-text bg-success text-light" id="btnMinus"><i class="fa fa-minus"></i></button>
@@ -56,65 +56,67 @@
     </section>
 
     <script>
-        document.addEventListener("DOMContentLoaded",function(event){
+        document.addEventListener("DOMContentLoaded", function (event) {
             const btnMinus = document.getElementById('btnMinus');
             const btnPlus = document.getElementById('btnPlus');
             const txtQty = document.getElementById('txtQty');
             const pid = document.getElementById('pid');
             const btnCart = document.getElementById('btnCart');
-
-            btnPlus.addEventListener("click",function(){
-                let qty = parseInt(txtQty.value,10);
-                qty=isNaN(qty) ? 0 : qty;
-                //console.log(qty);
-                if(qty<10){
+        
+            btnPlus.addEventListener("click", function () {
+                let qty = parseInt(txtQty.value, 10);
+                qty = isNaN(qty) ? 0 : qty;
+                if (qty < 10) {
                     qty++;
                     txtQty.value = qty;
                 }
             });
-
-            btnMinus.addEventListener("click",function(){
-                let qty = parseInt(txtQty.value,10);
-                qty=isNaN(qty) ? 0 : qty;
-                //console.log(qty);
-                if(qty>1){
+        
+            btnMinus.addEventListener("click", function () {
+                let qty = parseInt(txtQty.value, 10);
+                qty = isNaN(qty) ? 0 : qty;
+                if (qty > 1) {
                     qty--;
                     txtQty.value = qty;
                 }
             });
-
-            btnCart.addEventListener("click",function(){
-                let qty = parseInt(txtQty.value,10);
-                qty=isNaN(qty) ? 0 : qty;
-                if(qty>0){
+        
+            btnCart.addEventListener("click", function () {
+                let qty = parseInt(txtQty.value, 10);
+                qty = isNaN(qty) ? 0 : qty;
+        
+                if (qty > 0) {
                     let postObj = {
-                        product_qty: qty,
-                        pid: pid.value,
-                        
-                    }
-                    console.log(postObj);
-                    fetch("/addtocart",{
+                        'product_qty': qty,
+                        'pid': pid.value,
+                    };
+        
+                    //console.log(postObj); // Debugging to check values before sending
+        
+                    fetch("/addtocart", {
                         method: 'POST',
                         credentials: 'same-origin',
-                        headers:{
+                        headers: {
                             'Accept': 'application/json',
-                            'X-Requested-With' : 'XMLHttpRequest',
-                            'X-CSRFToken' : '{{CSRF_token}}',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': '{{ csrf_token }}',  // Ensure CSRF token is present
                         },
                         body: JSON.stringify(postObj)
                     }).then(response => {
                         return response.json();
                     }).then(data => {
-                        console.log(data);
+                        //console.log(data);  // Output response in the console
+                        alert(data['status']);
+                    }).catch(error => {
+                        console.error("Error in POST request:", error);  // Handle fetch errors
                     });
-
-                }else{
-                    alert("Please Enter The Quantity");
-                    
+        
+                } else {
+                    alert("Please enter a valid quantity.");
                 }
-
             });
-
         });
+        
     </script>
+    
 {%endblock content%}

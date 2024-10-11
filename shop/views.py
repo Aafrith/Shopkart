@@ -10,16 +10,49 @@ def home(request):
     products = Product.objects.filter(trending = 1)
     return render(request,"shop/index.html",{"products":products})
 
+def cart_page(request):
+    if request.user.is_authenticated:
+        cart=Cart.objects.filter(user=request.user)
+        return render(request,"shop/cart.html",{"cart":cart})
+    else:
+        return redirect('/')
+
 def add_to_cart(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        if request.user.is_authenticated():
-            data=json.load(request)
+        if request.user.is_authenticated:
+            try:
+                data = json.load(request)
+                product_qty = data.get('product_qty')
+                product_id = data.get('pid')
+                product_status = Product.objects.get(id=product_id)
+                if product_status:
+                    if Cart.objects.filter(user=request.user.id,product_id=product_id):
+                        return JsonResponse({'status':'Product Is Already in the Cart'}, status=200)
+                    else:
+                        if product_status.quantity>=product_qty:
+                            Cart.objects.create(user=request.user,product_id=product_id,product_qty=product_qty)
+                            return JsonResponse({'status':'Product Added to Cart Successfully'}, status=200)
+                        else:
+                             return JsonResponse({'status':'Product Stock Is Not Available'}, status=200)
+
+                # You can further validate the fields here if necessary
+                print(f"Product Quantity: {product_qty}")
+                print(f"Product ID: {product_id}")
+                print(f"User ID: {request.user.id}")
+                # Continue with logic to add product to the cart
+
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {str(e)}")
+                return JsonResponse({'status': 'Invalid data format'}, status=400)
+
+            except Exception as e:
+                print(f"Unexpected error: {str(e)}")
+                return JsonResponse({'status': 'Error processing request'}, status=500)
         else:
-            return JsonResponse({'status':'Login to Add cart'},status=200)
+            return JsonResponse({'status': 'Login to Add cart'}, status=200)
 
     else:
-        return JsonResponse({'status':'Invalid Access'},status=200)
-
+        return JsonResponse({'status': 'Invalid Access'}, status=400)
 
 def logout_page(request):
     if request.user.is_authenticated:
