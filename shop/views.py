@@ -10,12 +10,73 @@ def home(request):
     products = Product.objects.filter(trending = 1)
     return render(request,"shop/index.html",{"products":products})
 
+def favviewpage(request):
+    if request.user.is_authenticated:
+        fav = Favourite.objects.filter(user=request.user)
+        return render(request,"shop/fav.html",{"fav":fav})
+    else:
+        return redirect('/')
+
+def remove_fav(request, fid):
+    try:
+        item = Favourite.objects.get(id=fid, user=request.user)
+        item.delete()
+        messages.success(request, "Favourite item removed successfully")
+    except Cart.DoesNotExist:
+        messages.error(request, "Favourite is item not found")
+    return redirect('/favviewpage')
+
+
+def remove_cart(request, cid):
+    try:
+        # Get the cart item by its ID and delete it
+        cartitem = Cart.objects.get(id=cid, user=request.user)
+        cartitem.delete()
+        messages.success(request, "Cart item removed successfully")
+    except Cart.DoesNotExist:
+        # Handle case where the cart item does not exist
+        messages.error(request, "Cart item not found")
+    return redirect('/cart')
+
+
 def cart_page(request):
     if request.user.is_authenticated:
         cart=Cart.objects.filter(user=request.user)
         return render(request,"shop/cart.html",{"cart":cart})
     else:
         return redirect('/')
+
+def fav_page(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if request.user.is_authenticated:
+            try:
+                data = json.load(request)
+                product_id = data.get('pid')
+                product_status = Product.objects.get(id=product_id)
+                if product_status:
+                    if Favourite.objects.filter(user=request.user.id,product_id=product_id):
+                        return JsonResponse({'status':'Product Is Already in the Favourite'}, status=200)
+                    else:
+                        Favourite.objects.create(user=request.user,product_id=product_id)
+                        return JsonResponse({'status':'Product Added To Favourite'}, status=200)
+                # You can further validate the fields here if necessary
+                print(f"Product ID: {product_id}")
+                print(f"User ID: {request.user.id}")
+                # Continue with logic to add product to the cart
+
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {str(e)}")
+                return JsonResponse({'status': 'Invalid data format'}, status=400)
+
+            except Exception as e:
+                print(f"Unexpected error: {str(e)}")
+                return JsonResponse({'status': 'Error processing request'}, status=500)
+        else:
+            return JsonResponse({'status': 'Login to Add Favourite'}, status=200)
+
+    else:
+        return JsonResponse({'status': 'Invalid Access'}, status=400)
+
 
 def add_to_cart(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
